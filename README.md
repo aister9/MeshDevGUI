@@ -30,6 +30,8 @@ From `output/Release` (defaults resolve relative to the executable):
 ```
 If arguments are omitted, it uses `dataset/scan25_cpuCleaned.obj`, `dataset/testGPUBinCleaned.obj`, and writes `dataset/deviation_output.{ply,obj}` in the project root.
 
+> Note: PLY output is currently experimental; primary supported interchange format is OBJ.
+
 ## Repository layout (key files)
 - `demo/demo.cpp` — CLI entry; writes colored PLY/OBJ.
 - `libs/geometry/GeometryDeviation.h` — deviation API; color maps.
@@ -46,3 +48,7 @@ Third-party:
 - OptiX and CUDA: subject to NVIDIA EULA/terms, not included here; you must obtain and accept those separately.
 
 If you distribute binaries that bundle cuBQL, include its license notice consistent with Apache 2.0 requirements.
+
+## To Do
+- Lightweight renderer to preview colored meshes.
+- Basic GUI for loading meshes, running deviation on CPU/GPU, and exporting results.
