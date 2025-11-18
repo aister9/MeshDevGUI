@@ -8,6 +8,10 @@ output/
 *.obj
 *.exp
 
+# Local datasets (keep only OBJ, ignore PLY)
+dataset/**/*.ply
+dataset/*.ply
+
 # CMake intermediates
 CMakeFiles/
 CMakeCache.txt
