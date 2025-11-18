@@ -1,6 +1,7 @@
 # MeshDevGUI
 
 CPU/GPU geometry deviation measurement and visualization. Uses cuBQL BVH builders/queries to compute per-vertex distances between a source mesh and a target mesh, then writes out colored PLY/OBJ for inspection. Includes simple GLSL renderer scaffolding.
+Implements the OBJ-based geometry deviation workflow from MeshDev (geometryDerivation): https://meshdev.sourceforge.net/
 
 ## Features
 - CPU and GPU deviation calculator (cuBQL BVH).
@@ -26,11 +27,11 @@ cmake --build build --config Release
 ## Run
 From `output/Release` (defaults resolve relative to the executable):
 ```bash
-./MeshDevGUI <source.obj/ply> <target.obj/ply> <output_ply>
+./MeshDevGUI <source.obj> <target.obj> <output.obj/ply>
 ```
 If arguments are omitted, it uses `dataset/scan25_cpuCleaned.obj`, `dataset/testGPUBinCleaned.obj`, and writes `dataset/deviation_output.{ply,obj}` in the project root.
 
-> Note: PLY output is currently experimental; primary supported interchange format is OBJ.
+> Note: PLY input is currently experimental; primary supported interchange format is OBJ.
 
 ## Repository layout (key files)
 - `demo/demo.cpp` — CLI entry; writes colored PLY/OBJ.
@@ -48,6 +49,12 @@ Third-party:
 - OptiX and CUDA: subject to NVIDIA EULA/terms, not included here; you must obtain and accept those separately.
 
 If you distribute binaries that bundle cuBQL, include its license notice consistent with Apache 2.0 requirements.
+
+## Dataset
+- Large OBJ assets are **not tracked in git** (each >25 MB). Download from your storage and place under `dataset/`:
+  - `dataset/scan25_cpuCleaned.obj`
+  - `dataset/testGPUBinCleaned.obj`
+- Download link (Google Drive, view-only/download-only): `https://drive.google.com/drive/folders/1zp1rCFbLHC5P_xOCY6sGU30L499t8gZD?usp=sharing`
 
 ## To Do
 - Lightweight renderer to preview colored meshes.
