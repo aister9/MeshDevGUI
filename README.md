@@ -45,6 +45,7 @@ This project is licensed under the Apache License 2.0 (see `LICENSE`).
 
 Third-party:
 - cuBQL (Apache 2.0, NVIDIA): fetched via FetchContent; follows its license.
+- Dear ImGui + backends (MIT License): see `LICENSE-3rdparty/IMGUI_LICENSE.txt`.
 - OptiX and CUDA: subject to NVIDIA EULA/terms, not included here; you must obtain and accept those separately.
 
 If you distribute binaries that bundle cuBQL, include its license notice consistent with Apache 2.0 requirements.
@@ -55,6 +56,9 @@ If you distribute binaries that bundle cuBQL, include its license notice consist
   - `dataset/testGPUBinCleaned.obj`
 - Download link (Google Drive, view-only/download-only): [here](https://drive.google.com/drive/folders/1zp1rCFbLHC5P_xOCY6sGU30L499t8gZD?usp=sharing)
 - Provenance: derived from DTU Dataset scan25 reconstructed via OpenMVS; ensure DTU license compliance for your use.
+
+## Experimental Visualizer (Codex Prototype)
+We are building an ImGui/GLSL-based visualizer prototype under `demo/experimental/`, implemented with the help of the Codex CLI agent. See [demo/experimental/README.md](demo/experimental/README.md) for details.
 
 ## To Do
 - Lightweight renderer to preview colored meshes.

@@ -10,4 +10,5 @@ target_include_directories(optixBaseLib PUBLIC
 )
 
 add_subdirectory(geometry)
+add_subdirectory(Visualizer)
 add_subdirectory(Renderer)

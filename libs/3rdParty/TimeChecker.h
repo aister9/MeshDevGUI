@@ -7,14 +7,17 @@
 
 namespace SPIN {
     template <typename Func, typename... Args>
-    double TimeCheck(Func func, Args&&... args) {
+    double TimeCheck(Func&& func, Args&&... args) {
         auto _check_begin = std::chrono::high_resolution_clock::now();
-        func(std::forward<Args>(args)...);
+
+        std::forward<Func>(func)(std::forward<Args>(args)...);
+
         auto _check_end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::micro> Dur = _check_end - _check_begin;
 
-        return Dur.count() / 1000.;
+        return Dur.count() / 1000.0;
     }
+
 
     template <typename Func, typename... Args>
     double TimeCheckCUDA(Func func, Args&&... args) {
