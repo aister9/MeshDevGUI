@@ -140,7 +140,7 @@ public:
             ImGui::Combo("Execution Mode", &m_computeMode, kExecutionModes, IM_ARRAYSIZE(kExecutionModes));
             ImGui::SliderFloat("Sigma Scale", &m_sigmaScale, 0.1f, 5.0f, "%.2f");
 
-            static const char *kColorMaps[] = {"Turbo", "Viridis", "Hot", "Cool", "Gray"};
+            static const char *kColorMaps[] = {"JET", "Turbo", "Viridis", "Hot", "Cool", "Gray"};
             ImGui::Combo("Color Map", &m_colorMapIndex, kColorMaps, IM_ARRAYSIZE(kColorMaps));
 
             ImGui::Spacing();
@@ -257,7 +257,7 @@ private:
 
         TriangleMesh &sourceMesh = *objA.model->meshes[0];
         TriangleMesh &targetMesh = *objB.model->meshes[0];
-        float sigma = computeMedianEdgeLength(sourceMesh) * m_sigmaScale;
+        float sigma = computeMedianEdgeLength(targetMesh) * m_sigmaScale;
 
         std::filesystem::path outputBase(m_outputPath.data());
         if (outputBase.extension().empty())
@@ -316,6 +316,7 @@ private:
 
             std::ostringstream oss;
             //oss << label << " deviation complete in " << elapsedMs << " ms -> " << outPath;
+            oss << label << " sigma : " << sigma << " -> " << outPath;
             m_statusMessage = oss.str();
             std::cout << "[MeshDevGUIPanel] " << m_statusMessage << std::endl;
             return true;
@@ -354,9 +355,9 @@ private:
 
     void resetPaths()
     {
-        setPathBuffer(m_sourcePath, std::filesystem::path("dataset/scan25_cpuCleaned.obj"));
-        setPathBuffer(m_targetPath, std::filesystem::path("dataset/testGPUBinCleaned.obj"));
-        setPathBuffer(m_outputPath, std::filesystem::path("dataset/deviation_output.ply"));
+        setPathBuffer(m_sourcePath, std::filesystem::path("../../dataset/scan25_cpuCleaned.obj"));
+        setPathBuffer(m_targetPath, std::filesystem::path("../../dataset/testGPUBinCleaned.obj"));
+        setPathBuffer(m_outputPath, std::filesystem::path("../../dataset/deviation_output.obj"));
         m_statusMessage = "Idle";
     }
 
@@ -365,16 +366,18 @@ private:
         switch (m_colorMapIndex)
         {
         case 0:
-            return SPIN::ColorMapLibrary::TurboColorMap();
+            return SPIN::ColorMapLibrary::JetColorMap(4);
         case 1:
-            return SPIN::ColorMapLibrary::ViridisColorMap();
+            return SPIN::ColorMapLibrary::TurboColorMap(4);
         case 2:
-            return SPIN::ColorMapLibrary::HotColorMap();
+            return SPIN::ColorMapLibrary::ViridisColorMap(4);
         case 3:
-            return SPIN::ColorMapLibrary::CoolColorMap();
+            return SPIN::ColorMapLibrary::HotColorMap(4);
         case 4:
+            return SPIN::ColorMapLibrary::CoolColorMap(4);
+        case 5:
         default:
-            return SPIN::ColorMapLibrary::GrayColorMap();
+            return SPIN::ColorMapLibrary::GrayColorMap(4);
         }
     }
 

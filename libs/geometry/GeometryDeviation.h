@@ -127,9 +127,6 @@ public:
             make_float3(1, 0, 0)};
         const auto &map = colorMap.empty() ? kDefaultMap : colorMap;
 
-        if (d < 0.0f)
-            return colorMap.empty() ? make_float3(0, 0, 0) : map.front();
-
         // Clamp normalized deviation
         float nd = std::clamp(d, 0.0f, 1.0f);
 
