@@ -58,7 +58,7 @@ If you distribute binaries that bundle cuBQL, include its license notice consist
 - Provenance: derived from DTU Dataset scan25 reconstructed via OpenMVS; ensure DTU license compliance for your use.
 
 ## Experimental Visualizer (Codex Prototype)
-We are building an ImGui/GLSL-based visualizer prototype under `demo/experimental/`, implemented with the help of the Codex CLI agent. See [demo/experimental/README.md](demo/experimental/README.md) for details.
+We are building an ImGui/GLSL-based visualizer prototype under `libs/Visualizer/`, implemented with the help of the Codex CLI agent. See [libs/Visualizer/README.md](libs/Visualizer/README.md) for details.
 
 ## To Do
 - Lightweight renderer to preview colored meshes.
