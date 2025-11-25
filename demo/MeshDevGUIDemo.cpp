@@ -92,6 +92,35 @@ namespace
         std::sort(edges.begin(), edges.end());
         return edges[edges.size() / 2]; // median
     }
+    float computeMeanEdgeLength(const TriangleMesh &mesh)
+    {
+        std::vector<float> edges;
+        edges.reserve(mesh.index.size() * 3);
+
+        for (const uint3 &f : mesh.index)
+        {
+            const float3 &v0 = mesh.vertex[f.x];
+            const float3 &v1 = mesh.vertex[f.y];
+            const float3 &v2 = mesh.vertex[f.z];
+
+            float e0 = length(v1 - v0);
+            float e1 = length(v2 - v1);
+            float e2 = length(v0 - v2);
+
+            edges.push_back(e0);
+            edges.push_back(e1);
+            edges.push_back(e2);
+        }
+
+        if (edges.empty())
+            return 1.0f;
+        float total = 0.0f;
+        for (const float &e : edges)
+        {
+            total += e;
+        }
+        return total / static_cast<float>(edges.size());
+    }
 }
 
 class MeshDevGUIPanel final : public Components
@@ -139,6 +168,18 @@ public:
             static const char *kExecutionModes[] = {"CPU", "GPU", "CPU + GPU"};
             ImGui::Combo("Execution Mode", &m_computeMode, kExecutionModes, IM_ARRAYSIZE(kExecutionModes));
             ImGui::SliderFloat("Sigma Scale", &m_sigmaScale, 0.1f, 5.0f, "%.2f");
+
+            //Make imgui combo for sigma calculation method
+            static const char *kSigmaMethods[] = {"Median Edge Length", "Mean Edge Length"};
+            ImGui::Combo("Sigma Calculation", &m_sigmaMethod, kSigmaMethods, IM_ARRAYSIZE(kSigmaMethods));
+            if (m_sigmaMethod == 0)
+            {
+                ImGui::TextUnformatted("Sigma will be computed using Median Edge Length of Target Mesh.");
+            }     
+            else
+            {
+                ImGui::TextUnformatted("Sigma will be computed using Mean Edge Length of Target Mesh.");
+            }
 
             static const char *kColorMaps[] = {"JET", "Turbo", "Viridis", "Hot", "Cool", "Gray"};
             ImGui::Combo("Color Map", &m_colorMapIndex, kColorMaps, IM_ARRAYSIZE(kColorMaps));
@@ -257,7 +298,12 @@ private:
 
         TriangleMesh &sourceMesh = *objA.model->meshes[0];
         TriangleMesh &targetMesh = *objB.model->meshes[0];
-        float sigma = computeMedianEdgeLength(targetMesh) * m_sigmaScale;
+        
+        float sigma = 1.0f;
+        if(m_sigmaMethod == 0)
+            sigma = computeMedianEdgeLength(targetMesh) * m_sigmaScale;
+        else
+            sigma = computeMeanEdgeLength(targetMesh) * m_sigmaScale;
 
         std::filesystem::path outputBase(m_outputPath.data());
         if (outputBase.extension().empty())
@@ -296,9 +342,11 @@ private:
             }
 
             std::vector<float> normalized = rawDeviations;
+            float average = 0.0f;
             for (float &d : normalized)
             {
                 d /= sigma;
+                average += clamp(d, 0.,1.) / static_cast<float>(normalized.size());
             }
 
             std::vector<float3> colors(normalized.size());
@@ -316,7 +364,7 @@ private:
 
             std::ostringstream oss;
             //oss << label << " deviation complete in " << elapsedMs << " ms -> " << outPath;
-            oss << label << " sigma : " << sigma << " -> " << outPath;
+            oss << label << " sigma : " << sigma << " -> " << outPath << " | Average normalized deviation: " << average;
             m_statusMessage = oss.str();
             std::cout << "[MeshDevGUIPanel] " << m_statusMessage << std::endl;
             return true;
@@ -389,6 +437,7 @@ private:
     int m_computeMode = 2; // 0: CPU, 1: GPU, 2: CPU+GPU
     float m_sigmaScale = 1.0f;
     int m_colorMapIndex = 0;
+    int m_sigmaMethod = 0; // 0: Median, 1: Mean
     std::vector<std::filesystem::path> m_recentSelection;
     std::vector<std::filesystem::path> m_lastDialogResult;
     std::string m_statusMessage;
