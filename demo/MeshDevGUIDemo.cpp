@@ -18,8 +18,8 @@
 #include "Object_t.h"
 #include "GeometryDeviation.h"
 
-using SPIN::Visualizer::Components;
-using SPIN::Visualizer::Stage;
+using ImGUIAX::Visualizer::Components;
+using ImGUIAX::Visualizer::Stage;
 
 namespace
 {
@@ -429,7 +429,7 @@ private:
         }
     }
 
-    SPIN::Visualizer::FileDialog m_fileDialog;
+    ImGUIAX::Visualizer::FileDialog m_fileDialog;
     DialogPurpose m_pendingPurpose = DialogPurpose::None;
     std::array<char, 520> m_sourcePath{};
     std::array<char, 520> m_targetPath{};
@@ -443,7 +443,7 @@ private:
     std::string m_statusMessage;
 };
 
-class FileDialogDemoApplication final : public SPIN::Visualizer::Application
+class FileDialogDemoApplication final : public ImGUIAX::Visualizer::Application
 {
 public:
     const char *title() const override { return "MeshDev GUI (Stage prototype)"; }
@@ -462,5 +462,5 @@ public:
 
 int main(int argc, char **argv)
 {
-    return SPIN::Visualizer::launch<FileDialogDemoApplication>(argc, argv);
+    return ImGUIAX::Visualizer::launch<FileDialogDemoApplication>(argc, argv);
 }
