@@ -25,12 +25,6 @@ add_custom_command(TARGET MeshDevConsole POST_BUILD
         "$<TARGET_FILE_DIR:MeshDevConsole>"
 )
 
-
-find_package(OpenGL REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
-find_package(GLEW CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
-
 add_executable (MeshDevGUI
     "MeshDevGUIDemo.cpp"
 )
@@ -46,6 +40,7 @@ target_include_directories(MeshDevGUI PUBLIC
      ${CMAKE_CURRENT_SOURCE_DIR}/libs
      ${CMAKE_CURRENT_SOURCE_DIR}/libs/geometry
      ${cuBQL_SOURCE_DIR}
+     ${imguiax_SOURCE_DIR}/libs
 )
 add_custom_command(TARGET MeshDevGUI POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different

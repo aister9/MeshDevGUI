@@ -1,19 +1,20 @@
 # MeshDevGUI
 
-CPU/GPU geometry deviation measurement and visualization. Uses cuBQL BVH builders/queries to compute per-vertex distances between a source mesh and a target mesh, then writes out colored PLY/OBJ for inspection. Includes simple GLSL renderer scaffolding. Implements the OBJ-based geometry deviation workflow from MeshDev (geometryDerivation): https://meshdev.sourceforge.net/
+CPU/GPU geometry deviation measurement and visualization. Uses cuBQL BVH builders/queries to compute per-vertex distances between a source mesh and a target mesh, then writes out colored PLY/OBJ for inspection. The GUI layer is integrated from ImGUIAX via CMake `FetchContent` rather than vendored into this repository. Implements the OBJ-based geometry deviation workflow from MeshDev (geometryDerivation): https://meshdev.sourceforge.net/
 
 ## Features
 - CPU and GPU deviation calculator (cuBQL BVH).
 - Color mapping with selectable palettes (jet, hot, cool, turbo, viridis, gray).
 - Outputs colored PLY (binary) and OBJ.
 - Command-line interface for source/target/output paths.
+- ImGUIAX-based GUI fetched at configure time.
 
 ## Build
 Prerequisites:
 - CMake 3.8+ (CUDA language enabled), C++17/CUDA17 toolchain
 - NVIDIA CUDA Toolkit 11.8+
 - NVIDIA OptiX 7.4+ (required by optixBaseLib)
-- Git (to fetch cuBQL via FetchContent)
+- Git (to fetch cuBQL and ImGUIAX via FetchContent)
 
 Configure/build example:
 ```bash
@@ -21,7 +22,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="D:/vcpkg/
 cmake --build build --config Release
 ```
 
-> Note: cuBQL builds CUDA instantiations; ensure `CMAKE_CUDA_ARCHITECTURES` matches your GPU. DLLs (e.g., `cuBQL_cuda_float3`) are copied next to the executable via a post-build step in `demo/CMakeLists.txt`.
+> Note: the first configure downloads third-party sources through `FetchContent` (`cuBQL`, `ImGUIAX`, and ImGUIAX's GUI dependencies). Ensure `CMAKE_CUDA_ARCHITECTURES` matches your GPU. DLLs such as `cuBQL_cuda_float3` are copied next to the executable via a post-build step in `demo/CMakeLists.txt`.
 
 ## Run
 From `output/Release` (defaults resolve relative to the executable):
@@ -34,17 +35,20 @@ If arguments are omitted, it uses `dataset/scan25_cpuCleaned.obj`, `dataset/test
 
 ## Repository layout (key files)
 - `demo/demo.cpp` – CLI entry; writes colored PLY/OBJ.
+- `demo/MeshDevGUIDemo.cpp` – GUI entry built on `visualizerLib` from ImGUIAX.
 - `libs/geometry/GeometryDeviation.h` – deviation API; color maps.
 - `include/geometry/GeometryDeviationHost.cpp` – CPU implementation.
 - `include/geometry/GeometryDeviationDevice.cu` – GPU stub/impl (requires cuBQL CUDA).
 - `libs/geometry/CMakeLists.txt` – geometryLib + CUDA source setup.
-- `demo/CMakeLists.txt` – app target and DLL copy rule.
+- `demo/CMakeLists.txt` – app targets and GUI linkage.
+- `CMakeLists.txt` – top-level `FetchContent` wiring for external dependencies.
 
 ## License
 This project is licensed under the Apache License 2.0 (see `LICENSE`).
 
 Third-party:
 - cuBQL (Apache 2.0, NVIDIA): fetched via FetchContent; follows its license.
+- ImGUIAX (Apache 2.0): fetched via FetchContent; follows its license.
 - Dear ImGui + backends (MIT License): see `LICENSE-3rdparty/IMGUI_LICENSE.txt`.
 - OptiX and CUDA: subject to NVIDIA EULA/terms, not included here; you must obtain and accept those separately.
 
@@ -57,8 +61,8 @@ If you distribute binaries that bundle cuBQL, include its license notice consist
 - Download link (Google Drive, view-only/download-only): [here](https://drive.google.com/drive/folders/1zp1rCFbLHC5P_xOCY6sGU30L499t8gZD?usp=sharing)
 - Provenance: derived from DTU Dataset scan25 reconstructed via OpenMVS; ensure DTU license compliance for your use.
 
-## Experimental Visualizer (Codex Prototype)
-We are building an ImGui/GLSL-based visualizer prototype under `libs/Visualizer/`, implemented with the help of the Codex CLI agent. See [libs/Visualizer/README.md](libs/Visualizer/README.md) for details.
+## GUI Integration
+The GUI executable links against `visualizerLib` provided by `ImGUIAX`. The dependency is fetched during CMake configure, so this repository does not need a checked-in copy of `libs/Visualizer`.
 
 ## To Do
 - Lightweight renderer to preview colored meshes.

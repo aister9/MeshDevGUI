@@ -1,5 +1,6 @@
 # Build and binary artifacts
 build/
+build-*/
 output/
 *.exe
 *.dll
