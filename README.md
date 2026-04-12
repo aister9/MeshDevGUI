@@ -25,17 +25,25 @@ cmake --build build --config Release
 > Note: the first configure downloads third-party sources through `FetchContent` (`cuBQL`, `ImGUIAX`, and ImGUIAX's GUI dependencies). Ensure `CMAKE_CUDA_ARCHITECTURES` matches your GPU. DLLs such as `cuBQL_cuda_float3` are copied next to the executable via a post-build step in `demo/CMakeLists.txt`.
 
 ## Run
-From `output/Release` (defaults resolve relative to the executable):
+Both executables are written to `output/`.
+
+CLI (`MeshDevConsole`):
 ```bash
-./MeshDevGUI <source.obj> <target.obj> <output.obj/ply>
+./output/MeshDevConsole <source.obj> <target.obj> <output.ply>
 ```
-If arguments are omitted, it uses `dataset/scan25_cpuCleaned.obj`, `dataset/testGPUBinCleaned.obj`, and writes `dataset/deviation_output.{ply,obj}` in the project root.
+If arguments are omitted, it uses `dataset/scan25_cpuCleaned.obj`, `dataset/testGPUBinCleaned.obj`, and writes `dataset/deviation_output.{ply,obj}`. The CLI computes both CPU and GPU deviation, prints timing for each, and exports both PLY and OBJ outputs.
+
+GUI (`MeshDevGUI`):
+```bash
+./output/MeshDevGUI
+```
+The GUI opens a file-dialog based workflow. Source mesh, target mesh, output base path, execution mode (`CPU`, `GPU`, `CPU + GPU`), sigma mode, and color map are selected in the panel. Running from the GUI writes suffixed outputs such as `_cpu.obj` and `_gpu.obj` based on the chosen output path.
 
 > Note: PLY input is currently experimental; primary supported interchange format is OBJ.
 
 ## Repository layout (key files)
-- `demo/demo.cpp` – CLI entry; writes colored PLY/OBJ.
-- `demo/MeshDevGUIDemo.cpp` – GUI entry built on `visualizerLib` from ImGUIAX.
+- `demo/demo.cpp` – `MeshDevConsole` CLI entry; writes colored PLY/OBJ.
+- `demo/MeshDevGUIDemo.cpp` – `MeshDevGUI` entry built on `visualizerLib` from ImGUIAX.
 - `libs/geometry/GeometryDeviation.h` – deviation API; color maps.
 - `include/geometry/GeometryDeviationHost.cpp` – CPU implementation.
 - `include/geometry/GeometryDeviationDevice.cu` – GPU stub/impl (requires cuBQL CUDA).
