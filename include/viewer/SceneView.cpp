@@ -5,8 +5,7 @@
 #include <cmath>
 #include <cstdint>
 #include <limits>
-#include <cstdio>
-#include <chrono>
+#include <stdexcept>
 
 namespace MeshDev
 {
@@ -197,71 +196,73 @@ void SceneView::render()
         glPixelStorei(GL_UNPACK_ALIGNMENT,previousAlignment);
         glPixelStorei(GL_UNPACK_ROW_LENGTH,previousRowLength);
         m_error.clear();
-        if (!m_pendingImage.empty())
+        if (!m_pendingImageDirectory.empty())
         {
             try
             {
-                saveFramePng(frame, m_pendingImage);
-                m_imageStatus = "Saved: " + m_pendingImage.u8string();
+                const auto *entry = m_workspace.selected();
+                if (!entry || entry->id != m_pendingImageMesh)
+                    throw std::runtime_error("Selected mesh changed before image export");
+                const auto path = saveNumberedFramePng(frame, m_pendingImageDirectory, *entry);
+                m_imageStatus = "Saved: " + path.u8string();
             }
             catch (const std::exception &e) { m_imageStatus = std::string("Save failed: ") + e.what(); }
-            m_pendingImage.clear();
+            m_pendingImageDirectory.clear();
         }
     }
     catch (const std::exception &e)
     {
         m_error = e.what();
-        if (!m_pendingImage.empty())
+        if (!m_pendingImageDirectory.empty())
         {
             m_imageStatus = "Save failed: rendering did not complete.";
-            m_pendingImage.clear();
+            m_pendingImageDirectory.clear();
         }
     }
 }
 
 void SceneView::drawImageSave()
 {
-    ImGui::BeginDisabled(!m_hasMesh);
+    const auto *entry = m_workspace.selected();
+    ImGui::BeginDisabled(!m_hasMesh || !entry);
     if (ImGui::Button("Save PNG..."))
     {
-        const auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-        const auto path = std::filesystem::absolute("scene_" + std::to_string(timestamp) + ".png");
-        std::snprintf(m_imagePath.data(), m_imagePath.size(), "%s", path.u8string().c_str());
-        m_replaceImage = false;
-        ImGui::OpenPopup("Save scene image");
-    }
-    ImGui::EndDisabled();
-    if (ImGui::BeginPopupModal("Save scene image", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::TextUnformatted("Save the current view as PNG (without UI panels).");
-        ImGui::SetNextItemWidth(500);
-        if (ImGui::InputText("Path", m_imagePath.data(), m_imagePath.size())) m_replaceImage = false;
         try
         {
-            auto path = std::filesystem::u8path(m_imagePath.data());
-            const bool empty = path.empty();
-            if (!empty) path = std::filesystem::absolute(path.replace_extension(".png")).lexically_normal();
-            const bool exists = !empty && std::filesystem::exists(path);
-            if (exists) ImGui::Checkbox("Replace existing PNG", &m_replaceImage);
-            ImGui::BeginDisabled(empty || (exists && !m_replaceImage));
-            if (ImGui::Button("Save"))
-            {
-                m_pendingImage = path;
-                m_dirty = true; // Render the final camera/material state before writing.
-                m_imageStatus = "Saving PNG...";
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndDisabled();
-            ImGui::SameLine();
+            auto initial = m_imageDirectory;
+            if (initial.empty() || !std::filesystem::is_directory(initial))
+                initial = entry->inputPath.empty() ? std::filesystem::current_path() : entry->inputPath.parent_path();
+            m_imageDialog.open(initial);
         }
-        catch (const std::exception &e) { ImGui::TextWrapped("%s", e.what()); }
-        if (ImGui::Button("Cancel")) ImGui::CloseCurrentPopup();
-        ImGui::EndPopup();
+        catch (const std::exception &e) { m_imageStatus = std::string("Save failed: ") + e.what(); }
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Quick Save PNG"))
+    {
+        try { queueImageSave(quickImageDirectory(*entry)); }
+        catch (const std::exception &e) { m_imageStatus = std::string("Save failed: ") + e.what(); }
+    }
+    if (ImGui::IsItemHovered()) ImGui::SetTooltip("Save to the source model's output folder with the next image number.");
+    ImGui::EndDisabled();
+    if (entry)
+    {
+        if (const auto directory = m_imageDialog.draw(*entry))
+        {
+            m_imageDirectory = *directory;
+            queueImageSave(*directory);
+        }
     }
     // Reserve one line so saving does not resize the viewport or change its aspect ratio.
     ImGui::TextUnformatted(m_imageStatus.empty() ? " " : m_imageStatus.c_str());
     if (!m_imageStatus.empty() && ImGui::IsItemHovered())
         ImGui::SetTooltip("%s", m_imageStatus.c_str());
+}
+
+void SceneView::queueImageSave(const std::filesystem::path &directory)
+{
+    m_pendingImageDirectory = directory;
+    m_pendingImageMesh = m_displayed;
+    m_dirty = true; // Render the final camera/material state before writing.
+    m_imageStatus = "Saving PNG...";
 }
 }

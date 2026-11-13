@@ -41,9 +41,60 @@ int main()
         catch (const std::invalid_argument &) { failed = true; }
         if (!failed || std::filesystem::file_size(path) != bytes.size())
             throw std::runtime_error("Invalid frame was not rejected before opening output");
+
+        MeshDev::MeshEntry entry;
+        entry.inputPath = directory / std::filesystem::u8path(u8"모델.obj");
+        entry.name = entry.inputPath.filename().u8string();
+        const auto quick = MeshDev::quickImageDirectory(entry);
+        const auto prefix = entry.inputPath.stem().u8string();
+        auto requireName = [&](const auto &image, const std::string &suffix) {
+            if (image.filename().u8string() != prefix+suffix)
+                throw std::runtime_error("Unexpected numbered image name: " + image.u8string());
+        };
+        requireName(MeshDev::nextFrameImagePath(quick, entry), "-BaseColor-001.png");
+        if (quick != directory / "output" || std::filesystem::exists(quick))
+            throw std::runtime_error("Quick-save destination or preview side effects are incorrect");
+        std::vector<std::filesystem::path> saved;
+        auto save = [&](const auto &folder) {
+            saved.push_back(MeshDev::saveNumberedFramePng(frame, folder, entry));
+            return saved.back();
+        };
+        requireName(save(quick), "-BaseColor-001.png");
+        requireName(save(quick), "-BaseColor-002.png");
+        // A result must actually be displayed before the filename says Deviation.
+        entry.results.emplace_back();
+        requireName(save(quick), "-Deviation-001.png");
+        requireName(save(quick), "-Deviation-002.png");
+        entry.material.showDeviation = false;
+        requireName(save(quick), "-BaseColor-003.png");
+        const auto custom = directory / "chosen folder";
+        requireName(save(custom), "-BaseColor-001.png");
+        // Continue after the highest existing number, including gaps and uppercase extensions.
+        saved.push_back(quick / std::filesystem::u8path(prefix+"-BaseColor-1000.PNG"));
+        { std::ofstream existing(saved.back()); existing << "existing image"; }
+        requireName(save(quick), "-BaseColor-1001.png");
+        if (std::filesystem::file_size(saved[saved.size()-2]) != 14)
+            throw std::runtime_error("An existing image was overwritten");
+        entry.name += " / 2";
+        requireName(MeshDev::nextFrameImagePath(quick, entry), "-mesh-2-BaseColor-001.png");
+        entry.inputPath.clear();
+        entry.name = "other/model?";
+        if (MeshDev::nextFrameImagePath(quick, entry).filename() != "other_model_-BaseColor-001.png")
+            throw std::runtime_error("Unsafe model filename was not sanitized");
+        failed = false;
+        try { MeshDev::quickImageDirectory(entry); }
+        catch (const std::invalid_argument &) { failed = true; }
+        if (!failed) throw std::runtime_error("A mesh without a source path cannot use quick save");
+        failed = false;
+        try { MeshDev::saveNumberedFramePng(frame, path, entry); }
+        catch (const std::filesystem::filesystem_error &) { failed = true; }
+        if (!failed) throw std::runtime_error("A file was accepted as an image directory");
+        for (const auto &image : saved) std::filesystem::remove(image);
+        std::filesystem::remove(custom);
+        std::filesystem::remove(quick);
         std::filesystem::remove(path);
         std::filesystem::remove(directory);
-        std::cout << "PNG round-trip, Unicode path and failure checks passed\n";
+        std::cout << "PNG round-trip, quick/custom folders, per-mode numbering, Unicode paths and failure checks passed\n";
         return 0;
     }
     catch (const std::exception &e) { std::cerr << e.what() << '\n'; return 1; }

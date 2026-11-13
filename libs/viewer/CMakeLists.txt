@@ -1,6 +1,7 @@
 add_library(meshViewerLib STATIC
     ../../include/viewer/SceneView.cpp
     ../../include/viewer/FrameImage.cpp
+    ../../include/viewer/ImageSaveDialog.cpp
     ../../include/viewer/MeshListPanel.cpp
     ../../include/viewer/DeviationPanel.cpp
     ../../include/viewer/MaterialPanel.cpp
