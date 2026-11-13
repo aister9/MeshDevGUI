@@ -1,0 +1,25 @@
+MeshDevGUI is distributed under the Apache License 2.0; see LICENSE.txt.
+Third-party components retain their own terms and copyright notices.
+
+cuBQL, NVIDIA OWL, ImGUIAX: licenses/cubql.txt, owl.txt, imguiax.txt
+Dear ImGui, GLFW, GLEW: licenses/imgui.txt, glfw.txt, glew.txt
+tinyobjloader: licenses/tinyobj_loader.h.txt
+stb_image and stb_image_write: licenses/stb_image.h.txt, stb_image_write.h.txt
+NVIDIA helper_math (modified for MSVC compatibility): licenses/helper_math.h.txt
+CUDA runtime (statically linked): licenses/CUDA.txt and CUDA-EULA.txt
+OptiX SDK headers: licenses/optix.txt
+Microsoft Visual C++ runtime: licenses/Microsoft-Redist.txt
+
+Microsoft runtime DLLs are copied from the Visual Studio x64 redist directory.
+NVIDIA driver components, including the OptiX driver implementation, are not
+redistributed in this package. Install a compatible driver from NVIDIA.
+
+Exact source revisions are recorded in BUILD-INFO.json. Upstream projects:
+https://github.com/NVIDIA/cuBQL
+https://github.com/NVIDIA/OWL
+https://github.com/aister9/ImGUIAX
+https://github.com/ocornut/imgui
+https://github.com/glfw/glfw
+https://github.com/nigels-com/glew
+https://github.com/tinyobjloader/tinyobjloader
+https://github.com/nothings/stb

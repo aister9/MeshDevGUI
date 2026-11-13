@@ -11,6 +11,8 @@ CPU/GPU geometry deviation measurement and visualization. Uses cuBQL BVH builder
 - OWL/OptiX mesh preview with orbit, pan, zoom, optional lighting, and deviation vertex colors.
 
 ## Build
+For a ready-to-run Windows build, download the ZIP from [GitHub Releases](https://github.com/aister9/MeshDevGUI/releases), extract the entire folder, and run `MeshDevGUI.exe`. Keep the included DLLs beside the EXE. The portable package includes the required application/C++ runtimes; it needs a compatible NVIDIA GPU and driver, but not a CUDA Toolkit or Visual Studio installation. See the packaged `README.txt` for tested hardware and limitations.
+
 Prerequisites:
 - CMake 3.24+ (CUDA language enabled), C++17/CUDA17 toolchain
 - NVIDIA CUDA Toolkit 11.8+
@@ -71,7 +73,7 @@ Third-party:
 - ImGUIAX (Apache 2.0): fetched via FetchContent; follows its license.
 - NVIDIA OWL (Apache 2.0): fetched via FetchContent; include its license notices when distributing linked binaries.
 - Dear ImGui + backends (MIT License): see `LICENSE-3rdparty/IMGUI_LICENSE.txt`.
-- OptiX and CUDA: subject to NVIDIA EULA/terms, not included here; you must obtain and accept those separately.
+- OptiX and CUDA: subject to NVIDIA EULA/terms. The portable package includes the statically linked CUDA runtime and corresponding notices; NVIDIA drivers are installed separately.
 
 If you distribute binaries that bundle cuBQL, include its license notice consistent with Apache 2.0 requirements.
 
@@ -162,7 +164,17 @@ ctest --test-dir build -C Release --output-on-failure
 
 Workspace tests cover multi-mesh import, roles/selection, raw-result preservation, per-mesh material changes, CPU/GPU result selection, no writes during calculation/material edits, exact exported colors, failed saves, input protection, and removal. The CPU/GPU geometry test checks analytic face/edge/vertex distances and repeated cuBQL queries. The camera test covers landscape/portrait fitting and camera interactions. The headless GPU test covers hit/miss colors, material-only updates, framebuffer resize, mesh replacement, invalid inputs, and repeated resource lifetimes. Camera tests can also be built independently using `cmake -S tests -B build-camera`; they require CUDA Toolkit headers for `helper_math.h`, but do not require a GPU, CUDA device compilation, or OWL.
 
+## Packaging Windows releases
+To assemble a Windows portable ZIP after the Release build and tests pass:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File packaging/Package-Windows.ps1 -Version 0.1.0
+```
+
+The script uses the configured Visual Studio/CUDA build, checks imported DLLs, includes third-party notices and source revisions, and writes a ZIP plus SHA-256 checksum under `output/packages/`. It excludes datasets, local UI settings, debug symbols and build tools. Existing package versions are never overwritten.
+
 ## To Do
+
 - Simultaneous multi-mesh scenes and source/target overlays.
 - Persisting workspace sessions and raw deviation data.
 - Background deviation jobs and progress/cancellation.
