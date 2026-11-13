@@ -1,5 +1,7 @@
 # MeshDevGUI
 
+**한국어** | [English](README.en.md)
+
 MeshDevGUI는 두 OBJ 모델 사이의 표면 거리(deviation)를 계산하고, 차이를 컬러맵으로 확인하는 Windows GUI 앱입니다. CPU 또는 GPU로 계산한 결과를 살펴보고, 컬러가 적용된 메시와 현재 시점의 이미지를 저장할 수 있습니다.
 
 [Windows 앱 다운로드](https://github.com/aister9/MeshDevGUI/releases/latest) · [모델 불러오기·계산](#모델-불러오기와-deviation-계산) · [색상 설정](#색상-설정과-메시-저장) · [이미지 저장](#현재-시점을-이미지로-저장)
