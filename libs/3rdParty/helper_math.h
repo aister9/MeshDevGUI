@@ -56,15 +56,8 @@ typedef unsigned short ushort;
 // host implementations of CUDA functions
 ////////////////////////////////////////////////////////////////////////////////
 
-inline float fminf(float a, float b)
-{
-    return a < b ? a : b;
-}
-
-inline float fmaxf(float a, float b)
-{
-    return a > b ? a : b;
-}
+// Scalar fminf/fmaxf are provided by <math.h>. Redefining them conflicts
+// with MSVC intrinsics (including VS 2026).
 
 inline double fminf(double a, double b)
 {

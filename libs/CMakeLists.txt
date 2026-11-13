@@ -10,3 +10,12 @@ target_include_directories(optixBaseLib PUBLIC
 )
 
 add_subdirectory(geometry)
+
+if(MESHDEV_BUILD_GUI OR MESHDEV_BUILD_RENDERER_TESTS)
+    add_subdirectory(workspace)
+    add_subdirectory(render)
+endif()
+if(MESHDEV_BUILD_GUI)
+    add_subdirectory(viewer)
+    add_subdirectory(app)
+endif()

@@ -1,0 +1,41 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 4, "minor": 2, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "vs2026-cuda135",
+      "displayName": "VS 2026 / CUDA 13.5 (x64)",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "toolset": "cuda=13.5",
+      "binaryDir": "${sourceDir}/build-vs2026-cuda135",
+      "environment": {
+        "CUDA_PATH": "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.5",
+        "CUDA_PATH_V13_5": "$env{CUDA_PATH}",
+        "PATH": "$env{CUDA_PATH}/bin;$env{CUDA_PATH}/bin/x64;$penv{PATH}"
+      },
+      "cacheVariables": {
+        "CMAKE_CUDA_ARCHITECTURES": "75",
+        "MESHDEV_BUILD_GUI": true,
+        "MESHDEV_BUILD_RENDERER_TESTS": true
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "vs2026-release",
+      "configurePreset": "vs2026-cuda135",
+      "configuration": "Release",
+      "jobs": 1,
+      "targets": ["MeshDevGUI", "MeshDevCameraTest", "MeshDevRendererSmoke", "MeshDevGeometrySmoke", "MeshDevWorkspaceTest", "MeshDevFrameImageTest"]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "vs2026-release",
+      "configurePreset": "vs2026-cuda135",
+      "configuration": "Release",
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}

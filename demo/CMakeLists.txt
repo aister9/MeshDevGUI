@@ -1,6 +1,7 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.24)
 
 add_executable (MeshDevConsole "demo.cpp")
+meshdev_copy_cuda_runtime(MeshDevConsole)
 
 
 set_target_properties(MeshDevConsole PROPERTIES
@@ -25,16 +26,17 @@ add_custom_command(TARGET MeshDevConsole POST_BUILD
         "$<TARGET_FILE_DIR:MeshDevConsole>"
 )
 
+if(MESHDEV_BUILD_GUI)
 add_executable (MeshDevGUI
     "MeshDevGUIDemo.cpp"
 )
+meshdev_copy_cuda_runtime(MeshDevGUI)
 set_target_properties(MeshDevGUI PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../output
+    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:MeshDevGUI>"
 )
 target_link_libraries(MeshDevGUI PRIVATE
-    optixBaseLib
-    geometryLib
-    visualizerLib
+    meshAppLib
 )
 target_include_directories(MeshDevGUI PUBLIC
      ${CMAKE_CURRENT_SOURCE_DIR}/libs
@@ -47,3 +49,4 @@ add_custom_command(TARGET MeshDevGUI POST_BUILD
         "$<TARGET_FILE:cuBQL_cuda_float3>"
         "$<TARGET_FILE_DIR:MeshDevGUI>"
 )
+endif()
