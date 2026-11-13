@@ -58,9 +58,20 @@ foreach ($dependency in @('cubql', 'owl', 'imguiax', 'imgui', 'glfw', 'glew', 'o
         ForEach-Object { Join-Path $source $_ } | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
     if (!$license) { throw "Missing license for $dependency" }
     Copy-Item -LiteralPath $license -Destination "$destination/licenses/$dependency.txt"
-    $revision = & git -C $source rev-parse HEAD
-    if ($LASTEXITCODE -ne 0) { throw "Cannot read revision for $dependency" }
-    $dependencies[$dependency] = $revision
+    if (Test-Path -LiteralPath (Join-Path $source '.git')) {
+        $revision = & git -C $source rev-parse HEAD
+        if ($LASTEXITCODE -ne 0) { throw "Cannot read revision for $dependency" }
+        $dependencies[$dependency] = $revision
+    } elseif ($dependency -eq 'glew') {
+        # GLEW is downloaded as an archive; git -C would incorrectly find the parent repository.
+        $versionParts = Get-Content (Join-Path $source 'config/version') | ForEach-Object {
+            if ($_ -match '^GLEW_(MAJOR|MINOR|MICRO)\s*=\s*(\d+)') { $matches[2] }
+        }
+        $dependencies[$dependency] = @{
+            version = ($versionParts -join '.')
+            source_sha256 = (Get-FileHash (Join-Path $source 'src/glew.c') -Algorithm SHA256).Hash.ToLowerInvariant()
+        }
+    } else { throw "Cannot identify source revision for $dependency" }
 }
 Copy-Item -LiteralPath (Join-Path $root 'LICENSE') -Destination "$destination/LICENSE.txt"
 Copy-Item -LiteralPath (Join-Path $CudaDirectory 'LICENSE') -Destination "$destination/licenses/CUDA.txt"
@@ -85,7 +96,8 @@ if ($LASTEXITCODE -ne 0) { throw 'Cannot read source revision' }
 $cuda = Get-Content -LiteralPath (Join-Path $CudaDirectory 'version.json') -Raw | ConvertFrom-Json
 @{
     version = $Version; source_commit = $commit; configuration = 'Release'; platform = 'windows-x64'
-    cuda = $cuda.cuda.version; msvc = $toolVersion; cuda_architectures = $cache['CMAKE_CUDA_ARCHITECTURES']
+    cuda = $cuda.cuda.version; cuda_runtime = $cuda.cuda_cudart.version
+    msvc = $toolVersion; cuda_architectures = $cache['CMAKE_CUDA_ARCHITECTURES']
     dependencies = $dependencies
 } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath "$destination/BUILD-INFO.json" -Encoding UTF8
 $hashes = Get-ChildItem -LiteralPath $destination -Recurse -File | Sort-Object FullName | ForEach-Object {
